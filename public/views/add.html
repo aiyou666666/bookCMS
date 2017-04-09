@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>添加顶级分类</title>
+		<script src="../js/jquery.js"></script>
+		<link rel="stylesheet" href="../css/bootstrap.css" />
+	</head>
+
+	<body>
+		<div class="container">
+			<h2>增加顶级分类</h2>
+			<input type="text" class="form-control" /></br>
+			<input type="text" class="form-control" /></br>
+			<input type="text" class="form-control" /></br>
+			<input type="text" class="form-control" /></br>
+			<input type="text" class="form-control" /></br>
+			<input type="text" class="form-control" />
+			<button class="btn  btn-primary" onclick="sub()">提交</button>
+
+		</div>
+	</body>
+
+</html>
+<script>
+	function sub() {
+		var arr = [];
+		$(".form-control").each(function() {
+			var item = $(this).val();
+			if($.trim(item)) {
+				arr.push(item)
+			}
+		});
+		$.ajax({
+			type: "post",
+			url: "/cate/addTopCate",
+			data: {
+				items: arr
+			},
+			complete: function(data) {
+				if(data.status==200){
+					location.href = "./ztree.html"
+				}else{
+					alert(data.statusText);
+				}
+				
+				
+			}
+		});
+
+	}
+</script>
