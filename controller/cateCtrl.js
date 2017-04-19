@@ -13,21 +13,6 @@ var callback = function(res, ret) {
 	}
 
 };
-//递归处理数据成标准格式
-function recursiveData(data, pid) {
-	var result = [],
-		temp;
-	for(var i in data) {
-		if(data[i].pid == pid) {
-			result.push(data[i]);
-			temp = recursiveData(data, data[i].id);
-			if(temp.length > 0) {
-				data[i].children = temp;
-			}
-		}
-	}
-	return result;
-}
 
 module.exports = {
 	addTop: function(req, res) {
@@ -68,5 +53,77 @@ module.exports = {
 			}
 
 		});
+	},
+	select: function(req, res) {
+		pool.getConnection(function(err, connection) {
+
+			connection.query(cate_model.select, [], function(err, result) {
+				if(result) {
+					result = {
+						code: 200,
+						res: result,
+						msg: '查询成功'
+					};
+				}
+				callback(res, result);
+				connection.release();
+
+			});
+
+		});
+
+	},
+	add: function(req, res) {
+		pool.getConnection(function(err, connection) {
+
+			connection.query(cate_model.insert, [req.body.name, req.body.pid], function(err, result) {
+
+				if(result) {
+					result = {
+						code: 200,
+						id: result.insertId,
+						msg: "添加成功"
+					}
+				};
+				callback(res,result);
+				connection.release();
+
+			});
+
+		});
+	},
+	update:function(req,res){
+		pool.getConnection(function(err,connection){
+			connection.query(cate_controller.update,[req.body.name,req.body.id],function(err,result){
+				if (result) {
+					result={
+						code:200,
+						msg:'更新成功'
+					};
+				}
+			callback(res,result);
+			connection.release();
+			});
+		});
+		
+	},
+	delete:function(req,res){
+		pool.getConnection(function(err,connection){
+			var param=req.query || req.params;
+			connection.query(cate_model.delete,[param.id],function(err,result){
+				if (result) {
+					result={
+						code:200,
+						msg:'删除成功'
+					}
+					
+				}
+				callback(res,result);
+				connection.release();
+				
+			});
+		});
+		
 	}
+
 }
