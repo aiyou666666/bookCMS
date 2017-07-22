@@ -3,9 +3,9 @@ function recursiveData(data,pid){
 	for (var i in data) {
 		if (data[i].pid==pid) {
 			result.push(data[i]);
-			temp.recursiveData(data,data[i].id)
+			temp=recursiveData(data,data[i].id)
 			if(temp.length>0){
-				data[i].chiildren=temp;
+				data[i].children=temp;
 				
 			}
 			

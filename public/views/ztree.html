@@ -38,7 +38,7 @@
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-						<button type="button" class="btn btn-primary" onclick="addTreeNode()">取消</button>
+						<button type="button" class="btn btn-primary" onclick="addTreeNode()">添加</button>
 					</div>
 
 				</div>
@@ -64,7 +64,7 @@
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-							<button type="button" class="btn btn-primary" onclick="updateTreeNode"></button>
+							<button type="button" class="btn btn-primary" onclick="updateTreeNode">更新</button>
 						</div>
 
 					</div>
@@ -107,11 +107,12 @@
    var zTree,rMenu;
    /*点击分类*/
    function onClick(event,treeId,treeNode,clickFlag){
+   	console.log("点击分类");
    	  openUpdateModal(treeNode.id,treeNode.name);
    	}
    /*鼠标右键*/
    function onRightClick(event,treeId,treeNode){
-   	  if (!treeNode && event.target.tagName.toLowerCase() !="button" && $(event.target).parent("a").length == 0 ) {
+   	  if (!treeNode && event.target.tagName.toLowerCase() != "button" && $(event.target).parents("a").length == 0) {
    	  	   zTree.cancelSelectedNode();
    	  	   showRMenu("root",event.clientX,event.clientY);
    	  	
@@ -148,7 +149,7 @@
  	
  }
  /*新增分类，打开对话框*/
-function oenAddModal(){
+function openAddModal(){
 	 var pid=zTree.getSelectedNodes()[0]['id'];
 	 var pname=zTree.getSelectedNodes()[0]['name'];
 	 $("#add_pid").val(pid);
@@ -196,6 +197,7 @@ function updateTreeNode(){
 		dataType:'json',
 		data:{id:id,name:name},
 		success:function(data){
+			console.log(data);
 			var nodes=zTree.getSelectedNodes();
 			nodes[0]['name']=name;
 			zTree.updateNode(nodes[0]);
@@ -210,7 +212,7 @@ function removeTreeNode(){
 	var id=nodes[0]["id"];
 	$.ajax({
 		type:"get",
-		url:"/cate/deCate?id="+id,
+		url:"/cate/delCate?id="+id,
 		success:function(data){
 			
 		}
@@ -228,7 +230,7 @@ function removeTreeNode(){
 				var setting={
 					callback:{
 						onClick:onclick,
-						onRightClick:onRightClick()
+						onRightClick:onRightClick
 					}
 				};
 			   $.fn.zTree.init($("#tree"),setting,zNodes);
