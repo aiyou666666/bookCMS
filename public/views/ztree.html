@@ -1,9 +1,248 @@
 <!DOCTYPE html>
 <html>
+
 	<head>
 		<meta charset="UTF-8">
-		<title></title>
+		<title>添加分类</title>
+		<link rel="stylesheet" href="../css/style.css" />
+		<link rel="stylesheet" href="../css/bootstrap.css" />
+		<link rel="stylesheet" href="../css/zTreeStyle.css" />
+
+		<script src="../js/jquery.js"></script>
+		<script src="../js/ztree.js"></script>
+		<script src="../js/bootstrap.js"></script>
+		<script src="../js/global.js"></script>
 	</head>
+
 	<body>
-	</body>
+		<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="addModalLabel">增加分类</h4>
+					</div>
+					<div class="modal-body">
+						<div class="input-group">
+							<span class="input-group-addon">PID</span>
+							<input type="text" class="form-control" id="add_pid" disabled>
+						</div>
+						<div class="input-group">
+							<span class="input-group-addon">父类</span>
+							<input type="text" class="form-control" id="add_pname" disabled>
+						</div>
+						<div class="input-group">
+							<span class="input-group-addon">名称</span>
+							<input type="text" class="form-control" id="add_name" />
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+						<button type="button" class="btn btn-primary" onclick="addTreeNode()">添加</button>
+					</div>
+
+				</div>
+			</div>
+		</div>
+		<div class="modal fade" id="updataModal" tabindex="-1" role="dialog" aria-labelledby="updateModal">
+			<div class="modal-dialog">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+							<h4 class="modal-title" id="updataModalLabel">更新分类</h4>
+						</div>
+						<div class="modal-body">
+							<div class="input-group">
+								<span class="input-group-addon">ID</span>
+								<input type="text" class="form-control" id="update_id" disabled>
+							</div>
+							<div class="input-group">
+								<span class="input-group-addon">新名称</span>
+								<input type="text" class="form-control" id="update_name" />
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+							<button type="button" class="btn btn-primary" onclick="updateTreeNode">更新</button>
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+		<!--del-->
+		<div class="modal fade" id="delModal" tabindex="-1" role="dialog" aria-labelledby="delModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="delModalLabel">删除分类</h4>
+					</div>
+					<div class="modal-body">确定删除分类吗？</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+						<button type="button" class="btn btn-primary" onclick="removeTreeNode();">确定</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container">
+			<div>
+				<ul id="tree" class="ztree"></ul>
+			</div>
+			
+		</div>
+		<div id="rMenu">
+			<ul>
+				<li id="m_add" class="btn btn-primary" onclick="openAddModal()">增加分类</li>
+				<li id="m_del" class="btn btn-danger" data-toggle="modal" data-target="#delModal">删除分类</li>
+			</ul>
+		</div>
+  </body>
 </html>
+<script>
+   var zTree,rMenu;
+   /*点击分类*/
+   function onClick(event,treeId,treeNode,clickFlag){
+   	console.log("点击分类");
+   	  openUpdateModal(treeNode.id,treeNode.name);
+   	}
+   /*鼠标右键*/
+   function onRightClick(event,treeId,treeNode){
+   	  if (!treeNode && event.target.tagName.toLowerCase() != "button" && $(event.target).parents("a").length == 0) {
+   	  	   zTree.cancelSelectedNode();
+   	  	   showRMenu("root",event.clientX,event.clientY);
+   	  	
+   	  } else if(treeNode && !treeNode.noR){
+   	  	 zTree.selectNode(treeNode);
+   	  	 showRMenu("node",event.clientX,event.clientY);
+   	  	
+   	  }
+   }
+   /*展示右键菜单*/
+  function showRMenu(type,x,y){
+  	 $("#rMenu ul").show();
+  	 if (type=="root") {
+  	 	$("#m_del").hide();
+  	 	
+  	 } else{
+  	 	$("#m_del").show();
+  	 }
+  	 rMenu.css({"top":y+"px","left":x+"px","visibility":"visible"});
+  	 $("body").bind("mousedown",onBodyMouseDown);
+  }
+  /*隐藏右键菜单*/
+ function hideRMenu(){
+     if (rMenu) {
+     	rMenu.css({"visibility":"hidden"});
+     	$("body").unbind("mousedown",onBodyMouseDown);
+     } 
+ 	
+ }
+ function onBodyMouseDown(event){
+ 	if (!(event.target.id == "rMenu" || $(event.target).parent("#rMenu").length >0)) {
+ 		 rMenu.css({"visibility":"hidden"});
+ 	} 
+ 	
+ }
+ /*新增分类，打开对话框*/
+function openAddModal(){
+	 var pid=zTree.getSelectedNodes()[0]['id'];
+	 var pname=zTree.getSelectedNodes()[0]['name'];
+	 $("#add_pid").val(pid);
+	 $("#add_name").val(pname);
+	 $("#addModal").modal('show');
+}
+/*新增分类动作*/
+function addTreeNode(){
+	var pid=$("#add_pid").val();
+	var name=$("#add_name").val();
+	hideRMenu();
+	/*与数据库交互*/
+	$.ajax({
+		type:"post",
+		url:"/cate/addCate",
+		dataType:"json",
+		data:{pid:pid,name:name},
+		success:function(data){
+			var newNode={id:data,name:name,pid:pid};
+			if (zTree.getSelectedNodes()[0]) {
+				zTree.addNodes(zTree.getSelectedNodes()[0],newNode)
+				
+			} else{
+				zTree.addNodes(null,newNode);
+			}
+			$("#addModal").modal('hide');
+		},
+	});
+}
+/*打开更新分类对话框*/
+ function openUpdateModal(id,name,pid){
+ 	 $("#update_id").val(id);
+ 	 $("#update_name").val(name);
+ 	 $("#update_pid").val(pid);
+ 	 $("#updateModal").modal("show");
+ }
+ /*更新分类动作*/
+function updateTreeNode(){
+	hideRMenu();
+	var id=$("#update_id").val();
+	var name=$("#update_name").val();
+	$.ajax({
+		type:"post",
+		url:"/cate/updateCate",
+		dataType:'json',
+		data:{id:id,name:name},
+		success:function(data){
+			console.log(data);
+			var nodes=zTree.getSelectedNodes();
+			nodes[0]['name']=name;
+			zTree.updateNode(nodes[0]);
+			$("#updataModal").modal('hide');
+		},
+	});
+}
+
+function removeTreeNode(){
+	hideRMenu();
+	var nodes=zTree.getSelectedNodes();
+	var id=nodes[0]["id"];
+	$.ajax({
+		type:"get",
+		url:"/cate/delCate?id="+id,
+		success:function(data){
+			
+		}
+	});
+	var nodes=zTree.getSelectedNodes();
+	zTree.removeNode(nodes[0]);
+	$("#delModal").modal("hide");
+}
+	$.ajax({
+		type:"get",
+		url:"/cate/allCate",
+		success:function(data){
+			if (data.res && data.res.length > 0) {
+				var zNodes=recursiveData(data.res,0);
+				var setting={
+					callback:{
+						onClick:onclick,
+						onRightClick:onRightClick
+					}
+				};
+			   $.fn.zTree.init($("#tree"),setting,zNodes);
+			   zTree=$.fn.zTree.getZTreeObj("tree");
+			   rMenu=$("#rMenu");
+				
+			} else{
+				location.href="add.html";
+			}
+			
+		}
+	});
+	
+	
+</script>
