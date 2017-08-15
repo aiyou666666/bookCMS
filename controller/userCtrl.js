@@ -15,7 +15,6 @@ var callback=function(res,ret){
 };
 module.exports={
 	add:function(req,res){
-		console.log("11111");
 		pool.getConnection(function(err,connection){
 			//获取参数
 			var param=req.query || req.params;

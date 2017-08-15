@@ -1,6 +1,6 @@
 
 /*
- 
+ * auther:aiyou
  * 书店cms
  * */
 var express = require('express');
